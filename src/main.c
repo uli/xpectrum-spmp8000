@@ -34,7 +34,14 @@
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
+#ifdef SPMP
+#include <libgame.h>
+#else
 #include <dirent.h>
+#endif
+#ifdef SPMP_ADBG
+#include <adbg.h>
+#endif
 
 //#define DEBUG_MSG
 //#define USE_ZIP
@@ -61,6 +68,8 @@
 char globalpath[247]="/var/mobile/Media/ROMs/iXpectrum/";
 #elif defined(ANDROID)
 char globalpath[247]="/sdcard/ROMs/xpectroid/";
+#elif defined(SPMP)
+char globalpath[247] = "xpectrum/";
 #else
 char globalpath[247]="roms/";
 #endif
@@ -271,7 +280,11 @@ void SyncFreq()
     do
     {
     	time = getTicks();
-    	usleep(100);
+#ifdef SPMP
+    	microlib_usleep(100);
+#else
+        usleep(100);
+#endif
     }
     while ((time - oldtime) < delayvalue); // asegura la temporizacion
 
@@ -288,7 +301,11 @@ void SyncFreq2()
     do
     {
     	timet = getTicks();
-    	usleep(100);
+#ifdef SPMP
+        microlib_usleep(100);
+#else
+        usleep(100);
+#endif
     }
     while ((timet - oldtimet) < /*5*/10); // asegura la temporizacion
 
@@ -366,7 +383,9 @@ void save_mconfig()
     if (fp == NULL) return;
     fwrite(&mconfig, 1, sizeof(mconfig), fp);
     fclose(fp);
+#ifndef SPMP
     sync();
+#endif
 }
 
 
@@ -716,7 +735,9 @@ void save_bmp(char *name,unsigned char *punt, int ancho, int alto, int align)
         fwrite(punt+(alto-i)*align, 1, ancho, fp);
     }
     fclose(fp);
+#ifndef SPMP
     sync();
+#endif
 }
 #endif
 
@@ -790,6 +811,15 @@ int compare(const struct files *a, const struct files *b)
     return (r);
 }
 
+#ifdef SPMP
+#define dirent _ecos_dirent
+#define DIR _ecos_DIR
+#define readdir _ecos_readdir
+#define opendir _ecos_opendir
+#define closedir _ecos_closedir
+#define mkdir _ecos_mkdir
+#endif
+
 void read_list_rom()
 {
     DIR *fd;
@@ -813,7 +843,16 @@ void read_list_rom()
 
             sprintf(files[nfiles].file, "%s%s", actual_roms_dir, direntp->d_name);
 
-            if ( direntp->d_type & DT_DIR)
+#ifdef SPMP
+            struct stat st;
+            char pt[256];
+            sprintf(pt, "%s/%s", actual_roms_dir, direntp->d_name);
+            stat(pt, &st);
+            int isdir = S_ISDIR(st.st_mode);
+#else
+            int isdir = direntp->d_type & DT_DIR;
+#endif
+            if (isdir)
             {
                 if (!strcmp(direntp->d_name,"..") && !strcmp(actual_roms_dir,/*"roms/*/globalpath))//TODO FIX!
                     continue;
@@ -1071,7 +1110,11 @@ int get_rom(int tape)
         saves_dir = strcasecmp(actual_roms_dir+strlen(actual_roms_dir)-6,"saves/") == 0 ? 1 : 0;
 
         if(downloads_dir)
+#ifdef SPMP
           sprintf(cad,"DOWNLOADS (%u) (Use A to refresh)",nfiles-ndirs);
+#else
+          sprintf(cad,"DOWNLOADS (%u) (Use EDIT to refresh)",nfiles-ndirs);
+#endif
         else if(saves_dir)
           sprintf(cad,"SAVES (%u)",nfiles-ndirs);
         else
@@ -1248,6 +1291,8 @@ int get_rom(int tape)
         	v_putcad(1,28,132,"Use X to Exit, B to Play, Y to delete");
         else
             v_putcad(1,28,132,"Use X to Exit, Use B to Play");
+#elif defined(SPMP)
+        v_putcad(1,28,132,"CANCEL: exit, OK: play, DELETE: delete");
 #else
         v_putcad(1,28,132,"Use X to Exit, B to Play, Y to delete");
 #endif
@@ -1493,14 +1538,25 @@ void credits()
     v_putcad((40-18)/2,y,132,"James McKay / X128");y += 2;
     v_putcad((40-24)/2,y,132,"Ulrich Doewich / Caprice");y += 2;
     v_putcad((40-22)/2,y,132,"Sergey Bulba /  AY2SNA");y += 2;
-    v_putcad((40-27)/2,y,132,"and others (thanks for all)");//y += 2;
+    v_putcad((40-27)/2,y,132,"and others (thanks for all)");y += 2;
+#ifdef SPMP
+    v_putcad((40-27)/2,y,129,"SPMP8K port by Ulrich Hecht"); y++;
+    v_putcad((40-24)/2,y,129,"<ulrich.hecht@gmail.com>"); y += 2;
+    v_putcad((40-25)/2,y,130,"Press DOWN to map buttons");
+#endif
 #endif
 
     SyncFreq2();
     dump_video();
 
     while(( time + 10000 > getTicks()) &&
-          !(nKeys & (JOY_BUTTON_A | JOY_BUTTON_B | JOY_BUTTON_X | JOY_BUTTON_Y | JOY_BUTTON_MENU)))
+          !(nKeys & (JOY_BUTTON_A | JOY_BUTTON_B | JOY_BUTTON_X | JOY_BUTTON_Y | JOY_BUTTON_MENU
+#ifdef SPMP
+                     | JOY_BUTTON_DOWN
+#endif
+                    )
+           )
+         )
     {
         nKeys = joystick_read();
 
@@ -1510,6 +1566,11 @@ void credits()
            old = getTicks();
         }
     }
+
+#ifdef SPMP
+    if (nKeys & JOY_BUTTON_DOWN)
+        map_buttons();
+#endif
 
     while(nKeys & (JOY_BUTTON_A | JOY_BUTTON_B | JOY_BUTTON_X | JOY_BUTTON_Y | JOY_BUTTON_MENU)) nKeys = joystick_read();
 }
@@ -1558,7 +1619,9 @@ void write_pokefile(char *name)
         }
     }
     fclose(fp);
+#ifndef SPMP
     sync();
+#endif
 }
 
 void read_pokefile(char *name)
@@ -1761,8 +1824,13 @@ int poke_manager()
             v_putcad(5,y,130,"Return");y += 2;
             COLORFONDO = 128;
             y += 4;
+#ifdef SPMP
+            v_putcad(2,y,132,"Use EDIT to edit, OK to select"); y += 2;
+            v_putcad(2,y,132,"Use CANCEL to abort");
+#else
             v_putcad(2,y,132,"Use A to edit, B to select"); y += 2;
             v_putcad(2,y,132,"Use X to abort");
+#endif
         }
 
         if (editor_mode == 1)
@@ -1791,9 +1859,13 @@ int poke_manager()
             COLORFONDO = 128;
             v_putcad((40-34)>>1,y,132,"Use L/R to move the string cursor.");y += 2;
             v_putcad((40-34)>>1,y,132,"Use LEFT/RIGHT in Virtual Keyboard");y += 2;
+#ifdef SPMP
+            v_putcad((40-37)>>1,y,132,"Use EDIT to edit poke, OK to select");y += 2;
+            v_putcad((40-19)>>1,y,132,"Use CANCEL to abort");y += 2;
+#else
             v_putcad((40-31)>>1,y,132,"Use A to edit poke, B to select");y += 2;
             v_putcad((40-14)>>1,y,132,"Use X to abort");y += 2;
-
+#endif
         }
 
         if (editor_mode == 2)
@@ -1837,8 +1909,11 @@ int poke_manager()
             v_putcad((40-31)>>1,y,132,"Use UP/DOWN to select the POKE");y += 2;
             v_putcad((40-35)>>1,y,132,"Use L/R to move the numeric cursor.");y += 2;
             v_putcad((40-34)>>1,y,132,"Use LEFT/RIGHT in Virtual Keyboard");y += 2;
+#ifdef SPMP
+            v_putcad((40-39)>>1,y,132,"Use OK to select and CANCEL to finish");y += 2;
+#else
             v_putcad((40-31)>>1,y,132,"Use B to select and X to finish");y += 2;
-
+#endif
         }
 
         SyncFreq2();
@@ -2137,7 +2212,11 @@ int disk_manager()
         COLORFONDO = 128;
         v_putcad((40-34)>>1,y,132,"Use L/R to move the string cursor.");y += 2;
         v_putcad((40-34)>>1,y,132,"Use LEFT/RIGHT in Virtual Keyboard");y += 2;
+#ifdef SPMP
+        v_putcad((40-34)>>1,y,132,"Use OK to select, CANCEL to abort");y += 2;
+#else
         v_putcad((40-34)>>1,y,132,"Use B to select and X to abort");y += 2;
+#endif
 
         SyncFreq2();
         dump_video();
@@ -2195,7 +2274,10 @@ int disk_manager()
                 if (cad[0] != 0)
                 {
 					sprintf(photo_name,"%s/saves/%s.dsk",globalpath,cad);
-                    m = dsk_save(photo_name);sync();
+                    m = dsk_save(photo_name);
+#ifndef SPMP
+                    sync();
+#endif
                 }
 
                 for(n = 0;n<60;n++)
@@ -2789,7 +2871,9 @@ void write_keyfile(char *name)
     fprintf(fp,"L: %i\n",map_keys[8]);
     fprintf(fp,"R: %i\n",map_keys[9]);
     fclose(fp);
+#ifndef SPMP
     sync();
+#endif
 }
 
 void read_keyfile(char *name)
@@ -3476,7 +3560,9 @@ int compress_rom(char *name)
     BZ2_bzWriteClose (&bzip_err, my_bzip,0,(void*)&n,(void*)&m);
     fclose(fp_bzip);
     free(temp);
+#ifndef SPMP
     sync();
+#endif
     if (i != BZ_OK || bzip_err != BZ_OK)
     {
         remove(filename);
@@ -3590,7 +3676,9 @@ int save_state(int st)
         rename(photo_name,savefile);
     }
     else remove(photo_name);
+#ifndef SPMP
     sync();
+#endif
 
     free(mem);
 
@@ -3993,6 +4081,14 @@ int android_main(int argc, char *argv[])
 int main(int argc, char *argv[])
 #endif
 {
+#ifdef SPMP
+    libgame_chdir_game();
+#ifdef SPMP_ADBG
+    adbg_init();
+    adbg_printf("main===========================\n");
+    adbg_printf("main\n");
+#endif
+#endif
     int i,r,n,ret;
     int dclock;
     int sel_key = 0;
@@ -4481,7 +4577,11 @@ int main(int argc, char *argv[])
 
             if (skip == 0)
             {
-            	  dump_video();
+#ifdef SPMP
+                dump_video_nosync();
+#else
+                dump_video();
+#endif
                 //Seleuco: Esta temporizacion solamente se tiene que hacer si no se reproduce Audio. Para evitar underuns dejar que temporice el audio si existe sonido.
                 if (mconfig.sound_mode == 0 && !(mconfig.speed_loading && tape_playing) && !(mconfig.frameskip == 2))
                 {
