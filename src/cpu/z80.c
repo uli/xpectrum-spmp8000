@@ -33,6 +33,7 @@
 #include "shared.h"
 #include "z80_tables.h"
 #include "z80_macros.h"
+#include "zx.c"
 
 #define Z80WriteMem(a,b,c) Z80WriteMem(a,b)
 #define Z80InPort(a,b)     Z80InPort(b)
