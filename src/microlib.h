@@ -73,4 +73,6 @@ extern int            sound_close();
 extern void           sound_volume(int, int);
 extern int            sound_send(void *samples,int nsamples);
 
+extern void map_buttons(void);
+
 #endif
