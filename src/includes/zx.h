@@ -71,3 +71,7 @@ extern byte  mic_on;
 
 extern int ZX_LoadState(void *mem);
 extern int ZX_SaveState(void *mem);
+
+void port_0xfffd (byte value);
+void port_0xbffd (byte value);
+void port_0x1ffd (byte value);

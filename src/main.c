@@ -262,7 +262,7 @@ inline int min(int a, int b) {
 //int k =0;
 void SyncFreq()
 {
-    unsigned time;
+    int time;
     static int oldtime = 0;
 
 /*
@@ -883,7 +883,7 @@ void read_list_rom()
         closedir(fd);
     }
 
-    qsort(files, nfiles, sizeof(files[0]), &compare);
+    qsort(files, nfiles, sizeof(files[0]), (void *)&compare);
 
 /*
     for(n = 0;n<(nfiles);n++) //ordena
@@ -932,10 +932,12 @@ char * get_name_short(char *name, int sz) // devuelve el nombre del fichero reco
     return (char*)name2;
 }
 
+int zip_load(char *name);
+
 byte  scrbuff[2*16*16384 * 2]; //TODO He aumentado el buffer * 2 ver porque petaba antes los z80 al cargarlos
 char last_rom_name[512];
 
-int load_scr(char *name, char * buffer, int size)
+int load_scr(char *name, byte * buffer, int size)
 {
     FILE *fp;
 
@@ -976,7 +978,7 @@ int load_scr(char *name, char * buffer, int size)
 
 
 
-int load_savsrc(char *name, char * buffer, int size)
+int load_savsrc(char *name, byte * buffer, int size)
 {
     FILE *fp;
     byte ula64colors[64];
@@ -1067,6 +1069,8 @@ char * get_name(char *name) // devuelve el nombre del fichero completo
 }
 
 int scale = 1;
+
+int compress_rom(char *name);
 
 int get_rom(int tape)
 {
@@ -2325,6 +2329,8 @@ int disk_manager()
     return ret;
 }
 
+void tape_browser(void);
+
 /****************************************************************************************************************/
 // config screen
 /****************************************************************************************************************/
@@ -2990,7 +2996,7 @@ int display_keyboard()
             {
                 keyboard_on = 0;
                 while(nKeys & JOY_BUTTON_X) nKeys = joystick_read(); // para quieto!!
-                return;
+                return 0;
             }
         }
 
@@ -3196,7 +3202,7 @@ int zip_load(char *name)
             zip_num_files++;
         }
 
-        if ((idx+1)<gi.number_entry)
+        if ((idx+1)<(int)gi.number_entry)
         {
             err = unzGoToNextFile(uf);
             if (err!=UNZ_OK)
@@ -3321,6 +3327,7 @@ int zip_load(char *name)
 
     unzCloseCurrentFile(uf);
     unzClose(uf);
+    return 0;
 }
 
 #endif
@@ -3648,7 +3655,7 @@ int save_state(int st)
             SUMA_PUNT(FDC.buffer_endptr);
             if (active_track) memcpy(&track_temp,active_track,sizeof (t_track)); else memset(&track_temp,0,sizeof (t_track));
             RESTA_PUNT(track_temp.data);
-            for(n = 0;n<track_temp.sectors;n++)
+            for(n = 0;n<(int)track_temp.sectors;n++)
             {
                 RESTA_PUNT(track_temp.sector[n].data);
             }
@@ -3734,7 +3741,7 @@ int load_state(int st)
         BZ2_bzRead (&bzip_err, my_bzip, (void *) &FDC_temp,  sizeof (t_FDC));
         BZ2_bzRead (&bzip_err, my_bzip, (void *) &track_temp,  sizeof (t_track));
         SUMA_PUNT(track_temp.data);
-        for(n = 0;n<track_temp.sectors;n++)
+        for(n = 0;n<(int)track_temp.sectors;n++)
         {
             SUMA_PUNT(track_temp.sector[n].data);
         }
@@ -3805,7 +3812,7 @@ int load_state(int st)
 }
 
 
-int
+void
 tape_browser()
 {
     char cad[256];

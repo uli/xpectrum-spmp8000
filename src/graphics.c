@@ -85,7 +85,7 @@ char SpectrumFlashFlag=0;
  Creates tables for direct access to videomemory pixels and attr.
 ------------------------------------------------------------------*/
 
-extern set_emupalette();
+extern void set_emupalette();
 
 unsigned short Pixeles[192],Atributos[192];
 

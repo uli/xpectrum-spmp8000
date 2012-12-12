@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <libgame.h>
 
-char *video_screen8 = NULL;
+unsigned char *video_screen8 = NULL;
 
 static int microlib_inited = 0;
 

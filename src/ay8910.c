@@ -1,5 +1,5 @@
 #include "shared.h"
-
+#include "microlib.h"
 
 //void initSoundLog2(void);
 /////

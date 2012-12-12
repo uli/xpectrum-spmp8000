@@ -1783,7 +1783,7 @@ int Tape_init(void *fp, int size)
 }
 
 
-Tape_close()
+int Tape_close()
 {
      tape_close();
      return 1;

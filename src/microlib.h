@@ -59,9 +59,10 @@ enum  { JOY_BUTTON_UP=(1<<0),
 long joystick_read();
 
 // video
-extern char  *video_screen8;
+extern unsigned char  *video_screen8;
 
 void dump_video();
+void dump_video_nosync(void);
 
 //init,end, Seleuco
 void microlib_init();
@@ -73,6 +74,7 @@ extern int            sound_close();
 extern void           sound_volume(int, int);
 extern int            sound_send(void *samples,int nsamples);
 
-extern void map_buttons(void);
+void map_buttons(void);
+void microlib_usleep(int time);
 
 #endif

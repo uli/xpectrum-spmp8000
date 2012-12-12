@@ -52,6 +52,13 @@ void LoadCart(Z80Regs * regs, void * fp);
 byte LoadMIC(int tstate);
 int LoadRAW(void * fp, int siz, int tstatesmax);
 
+void UncompressZ80 (byte *dest, int tipo, int tam, Z80Regs * regs, void * fp);
+void loader_hook (register Z80Regs *spectrumZ80);
+int Tape_load(Z80Regs * regs);
+int Tape_rewind();
+int Tape_close();
+int Tape_init(void *fp, int size);
+char LoadSNA (Z80Regs * regs, void * fp, int cmodel);
 
  //int TZX_init(void *fp, int siz);
  //int TZX_genindex(void *fp, int siz);

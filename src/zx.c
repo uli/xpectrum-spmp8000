@@ -75,7 +75,7 @@ extern MCONFIG mconfig;
 
 byte inline Z80ReadMem(register word where);
 byte inline Z80ReadMem_notiming(register word where);
-extern scan_convert[];
+extern int scan_convert[];
 
 #define debugmsg(a,b) printf(text,"%s = %04x",a,b)
 
@@ -98,7 +98,7 @@ int pagewrites=0;
 int pagewritetime[5500];
 int pagewritevalue[5500];
 
-unsigned int Significance[65536];
+int Significance[65536];
 
 byte tape_format;
 
@@ -1451,7 +1451,7 @@ void ZX_LoadGame(int preferred_model, unsigned long crc, int quick)
 #define EXPORT_VER 0
 #define EXPORT_MARK (('f'<<24)|('Z'<<16)|('X'<<8)|('!'<<0))
     int EXPORT, EXPORT_SIGN;
-#define TRANSIT(val, size)  {int i;unsigned char *p=(unsigned char *)val; count+=size; if(!EXPORT) for(i=0;i<size;i++) *p++=*mem++; else for(i=0;i<size;i++) *mem++=*p++;  }
+#define TRANSIT(val, size)  {unsigned int i;unsigned char *p=(unsigned char *)val; count+=size; if(!EXPORT) for(i=0;i<size;i++) *p++=*mem++; else for(i=0;i<size;i++) *mem++=*p++;  }
 
 
 #define BLOCK(mode)   EXPORT=mode;                         \
@@ -1512,7 +1512,7 @@ void ZX_LoadGame(int preferred_model, unsigned long crc, int quick)
 int ZX_SaveState(void *memx)
 {
   int count=0;
-  unsigned char version=EXPORT_VER, nRAM_pages;
+  unsigned char version=EXPORT_VER, nRAM_pages = 3;
   unsigned char *mem=(unsigned char *)memx;
 
   switch(model)
@@ -1534,7 +1534,7 @@ int ZX_SaveState(void *memx)
 int ZX_LoadState(void *memx)
 {
   int count=0;
-  unsigned char version, nRAM_pages, n;
+  unsigned char version, nRAM_pages = 3, n;
   unsigned char *mem=(unsigned char *)memx;
 
   BLOCK(0); //loading
@@ -1575,6 +1575,9 @@ switch(model)
                 start=70908-TIMING_128;
                 pause=100;
                 repeat=32768;
+                break;
+        default:
+                abort();
                 break;
         }
 timing=start;

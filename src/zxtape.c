@@ -125,6 +125,7 @@ int tape_finish(){
 	
 	error =  libspectrum_tape_free(tape);
     if( error ) return error;
+    return 0;
 }
 
 static int

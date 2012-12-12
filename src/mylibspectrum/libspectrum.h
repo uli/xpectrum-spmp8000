@@ -528,6 +528,8 @@ libspectrum_tape_generalised_data_symbol*  libspectrum_tape_generalised_data_sym
 libspectrum_tape_generalised_data_symbol_edge_type  libspectrum_tape_generalised_data_symbol_type( const libspectrum_tape_generalised_data_symbol *symbol );
 libspectrum_word  libspectrum_tape_generalised_data_symbol_pulse( const libspectrum_tape_generalised_data_symbol *symbol, size_t which );
 
+libspectrum_tape_generalised_data_symbol_table*
+libspectrum_tape_block_data_table( libspectrum_tape_block *block );
 
 
 #ifdef __cplusplus

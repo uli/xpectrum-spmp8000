@@ -23,5 +23,7 @@
 #define GRAPHICS_H
 
 extern char SpectrumFlashFlag;
+void DrawZXtoScreen(byte * target, byte * source, int scale, int align);
+void JustRun(Z80Regs * regs, int do_skip);
 
 #endif

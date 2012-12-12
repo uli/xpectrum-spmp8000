@@ -59,3 +59,4 @@ extern int numKeys;
 extern int isShiftKey;
 extern int isSymbolKey;
 
+int tape_stop( void );
