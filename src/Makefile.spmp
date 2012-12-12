@@ -14,5 +14,11 @@ OBJS = font.o main.o spmp/microlib.o  \
 #OBJS += minizip/unzip.o minizip/ioapi.o
 LIBS = -lgame -lm
 #LIBS += -lz
+
 include $(LIBSPMP8K)/main.cfg
 include $(LIBGAME)/libgame.mk
+
+main.o: spmp/version.h
+spmp/version.h:
+	build_no=`git rev-list HEAD | wc -l | sed -e 's/ *//g' | xargs -n1 printf %d`.`git show HEAD|head -n1|cut -c8-11`; \
+	echo "#define BUILD_STRING \"$$build_no\"" > $@

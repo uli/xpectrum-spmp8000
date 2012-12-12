@@ -36,6 +36,7 @@
 #include <unistd.h>
 #ifdef SPMP
 #include <libgame.h>
+#include "spmp/version.h"
 #else
 #include <dirent.h>
 #endif
@@ -1531,7 +1532,11 @@ void credits()
     v_putcad((40-27)/2,y,132,"and others (thanks for all)");//y += 2;
 #else
     y=1;
+#ifdef SPMP
+    v_putcad((40-18)/2,y,130,"xpectrum " BUILD_STRING);y += 2;
+#else
     v_putcad((40-18)/2,y,130,"GP2Xpectrum v1.9.2");y += 2;
+#endif
     v_putcad((40-21)/2,y,132,"Based on the work of:");y += 2;
     v_putcad((40-17)/2,y,132,"Hermes/PS2Reality");y += 2;
     v_putcad((40-33)/2,y,132,"Metalbrain & Seleuco & SplinterGU");y += 2;
