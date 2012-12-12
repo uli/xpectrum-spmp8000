@@ -203,17 +203,17 @@ word Z80Run_NC (register Z80Regs *, int);
 word Z80Run_NCNI (register Z80Regs *, int);
 
 void Z80Patch (register Z80Regs *);
-void inline loader (register Z80Regs *);//TODO juntarla con la otra
+inline void loader (register Z80Regs *);//TODO juntarla con la otra
 
 byte Z80Debug (register Z80Regs *);
 
 //word Z80Hardware (register Z80Regs *);
 
-byte inline Z80ReadMem (register word);
-byte inline Z80ReadMem_notiming (register word);
+inline byte Z80ReadMem (register word);
+inline byte Z80ReadMem_notiming (register word);
 
-void inline Z80WriteMem (register word, register byte);
-void inline Z80WriteMem_notiming (register word, register byte);
+inline void Z80WriteMem (register word, register byte);
+inline void Z80WriteMem_notiming (register word, register byte);
 
 byte Z80InPort (register word);
 

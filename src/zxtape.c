@@ -53,6 +53,9 @@ int tape_init( void )
   return 0;
 }
 
+int
+tape_read_buffer( unsigned char *buffer, size_t length, libspectrum_id_t type,
+		  const char *filename, int autoload );
 int tape_open(void *fp, int size, const char *filename, int autoload )
 {
 
