@@ -50,6 +50,8 @@ void sound_volume(int left, int rigth)
     /* XXX: unimplemented */
 }
 
+int sound_initialized = 0;
+
 int sound_open(int rate, int bits, int stereo){
     if (bits != 16) {
 #ifdef SPMP_ADBG
@@ -57,23 +59,31 @@ int sound_open(int rate, int bits, int stereo){
 #endif
         return -1;
     }
+    if (sound_initialized)
+        return 0;
 #ifndef SPMP_ADBG
     sp.rate = rate;
     sp.channels = stereo + 1;
     emuIfSoundInit(&sp);
 #endif
+    sound_initialized = 1;
     return 0;
 }
 
 int sound_close(){
+    if (!sound_initialized)
+        return 0;
 #ifndef SPMP_ADBG
     emuIfSoundCleanup();
 #endif
+    sound_initialized = 0;
     return 0;
 }
 
 int sound_send(void *samples,int nsamples)
 {
+    if (!sound_initialized)
+        return -1;
 #ifndef SPMP_ADBG
     sp.buf = samples;
     sp.buf_size = nsamples * 2;
