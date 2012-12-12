@@ -2,7 +2,8 @@ LIBSPMP8K = ../../..
 
 TARGET = xpectrum
 
-CFLAGS += -DSPMP -W -Wall -Wno-unused -Iincludes -I. -Icpu -O2
+CFLAGS += -DSPMP -W -Wall -Wno-unused -Wno-old-style-declaration -Iincludes -I. -Icpu -O2
+#CFLAGS += -DUSE_ZLIB
 #CFLAGS += -DSPMP_ADBG
 OBJS = font.o main.o spmp/microlib.o  \
 	cpu/z80.o graphics.o ay8910.o fdc.o snaps.o player.o \
@@ -10,6 +11,8 @@ OBJS = font.o main.o spmp/microlib.o  \
 	mylibspectrum/tzx_read.o  mylibspectrum/tape.o  mylibspectrum/tape_block.o mylibspectrum/myglib.o \
 	mylibspectrum/tap.o mylibspectrum/tape_set.o mylibspectrum/symbol_table.o \
 	mylibspectrum/libspectrum.o mylibspectrum/zlib.o mylibspectrum/tape_accessors.o zxtape.o
+#OBJS += minizip/unzip.o minizip/ioapi.o
 LIBS = -lgame -lm
+#LIBS += -lz
 include $(LIBSPMP8K)/main.cfg
 include $(LIBGAME)/libgame.mk
