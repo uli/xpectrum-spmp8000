@@ -21,7 +21,7 @@
 #ifdef AS_DEBUG
 #define DBG(x...) fprintf(stderr, x)
 #else
-#define DBG(x)
+#define DBG(x...)
 #endif
 
 #define VERSION "R1.02"
