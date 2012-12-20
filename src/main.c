@@ -31,8 +31,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifndef ACTSEMI
 #include <math.h>
 #include <time.h>
+#endif
 #include <unistd.h>
 #ifdef SPMP
 #include <libgame.h>
@@ -42,6 +44,9 @@
 #endif
 #ifdef SPMP_ADBG
 #include <adbg.h>
+#endif
+#ifdef ACTSEMI
+#include <actsemi.h>
 #endif
 
 //#define DEBUG_MSG
@@ -71,6 +76,8 @@ char globalpath[247]="/var/mobile/Media/ROMs/iXpectrum/";
 char globalpath[247]="/sdcard/ROMs/xpectroid/";
 #elif defined(SPMP)
 char globalpath[247] = "xpectrum/";
+#elif defined(ACTSEMI)
+char globalpath[247] = "/mnt/disk0/xpectrum/";
 #else
 char globalpath[247]="roms/";
 #endif
@@ -2913,6 +2920,11 @@ void read_keyfile(char *name)
     	map_keys[9] = SPECKEY_SYMB;
     	return;
     }
+#ifdef ACTSEMI
+    char buf[256];
+#define fscanf(fp, format, x...) \
+    (fgets(buf, 256, fp), sscanf(buf, format, x))
+#endif
     if (fscanf(fp,"mJoystick: %i\n",&m) == 1) mJoystick = m;
     if (fscanf(fp,"LEFT: %i\n",&m) == 1) map_keys[0] = m;
     if (fscanf(fp,"RIGHT: %i\n",&m) == 1) map_keys[1] = m;
@@ -4110,6 +4122,8 @@ int main_loop(void);
 int iphone_main(int argc, char *argv[])
 #elif defined(ANDROID)
 int android_main(int argc, char *argv[])
+#elif defined(ACTSEMI)
+void *xpectrum_main(void *data)
 #else
 int main(int argc, char *argv[])
 #endif
@@ -4135,6 +4149,9 @@ int main(int argc, char *argv[])
     adbg_printf("main===========================\n");
     adbg_printf("main\n");
 #endif
+#endif
+#if defined(ACTSEMI) && defined(AS_DEBUG)
+    fprintf(stderr, "thread started\n");
 #endif
     int dclock;
     int fd;
@@ -4202,6 +4219,9 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+#ifdef ACTSEMI
+extern int exit_xp_thread;
+#endif
 int main_loop(void)
 {
     static int nvol = 0;
@@ -4294,7 +4314,11 @@ int main_loop(void)
         count_fps = 0;
         count_fps_draw = 0;
         emulating = 1;
+#ifdef ACTSEMI
+        while(!exit_xp_thread)
+#else
         while(1)
+#endif
         {
 #ifdef  CAPTURE
             if (old_key &( JOY_BUTTON_VOLUP |JOY_BUTTON_SELECT))
@@ -4395,7 +4419,7 @@ int main_loop(void)
                 	sprintf( result, "FPS: %d/%d", fpsseg/2,fpsseg );
                 }
                 else
-                    sprintf( result, "FPS: %d", fpsseg );
+                    sprintf( result, "FPS: %d dv %d", fpsseg, delayvalue );
 
                 int tmp = COLORFONDO; /* if (!full_screen) COLORFONDO = 134; */
                 COLORFONDO = 134;
