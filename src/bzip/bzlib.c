@@ -951,7 +951,11 @@ static Bool myfeof ( FILE* f )
 {
    Int32 c = fgetc ( f );
    if (c == EOF) return True;
+#ifdef ACTSEMI
+   fseek(f, -1, SEEK_CUR);
+#else
    ungetc ( c, f );
+#endif
    return False;
 }
 
@@ -1464,8 +1468,12 @@ BZFILE * bzopen_or_bzdopen
 
    if (open_mode==0) {
       if (path==NULL || strcmp(path,"")==0) {
+#ifdef ACTSEMI
+        fp = NULL;
+#else
         fp = (writing ? stdout : stdin);
         SET_BINARY_MODE(fp);
+#endif
       } else {
         fp = fopen(path,mode2);
       }
@@ -1489,7 +1497,10 @@ BZFILE * bzopen_or_bzdopen
                             unused,nUnused);
    }
    if (bzfp == NULL) {
-      if (fp != stdin && fp != stdout) fclose(fp);
+#ifndef ACTSEMI
+      if (fp != stdin && fp != stdout)
+#endif
+         fclose(fp);
       return NULL;
    }
    return bzfp;
@@ -1570,7 +1581,10 @@ void BZ_API(BZ2_bzclose) (BZFILE* b)
    }else{
       BZ2_bzReadClose(&bzerr,b);
    }
-   if(fp!=stdin && fp!=stdout){
+#ifndef ACTSEMI
+   if(fp!=stdin && fp!=stdout)
+#endif
+   {
       fclose(fp);
    }
 }
