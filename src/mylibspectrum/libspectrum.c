@@ -31,6 +31,8 @@
 #include <strings.h>		/* Needed for strcasecmp() on QNX6 */
 #endif				/* #ifdef HAVE_STRINGS_H */
 
+extern FILE *stderr;
+
 #ifdef HAVE_GCRYPT_H
 
 #include <gcrypt.h>

@@ -51,6 +51,7 @@
 */
 
 #include "shared.h"
+#include <stdio.h>
 
 /*extern*/ t_FDC FDC;
 
