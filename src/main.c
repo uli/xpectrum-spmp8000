@@ -4084,6 +4084,19 @@ void presync()
 
 ////////////////////////////
 
+void main_shutdown(void)
+{
+    save_mconfig();
+
+    tape_finish();
+
+    sound_volume(70,70);
+    sound_close();
+
+    microlib_end();
+}
+
+int main_loop(void);
 
 #if defined(IPHONE)
 int iphone_main(int argc, char *argv[])
@@ -4101,23 +4114,15 @@ int main(int argc, char *argv[])
     adbg_printf("main\n");
 #endif
 #endif
-    int i,r,n,ret;
     int dclock;
-    int sel_key = 0;
     int fd;
 
     unsigned time;
-    int nvol = 0;
     Z80Regs regs_z80;
-    char *mname;
     FILE *fp;
 
-    int count_fps = 0;
-    int fpsseg = 0;
-    long tape_stop_delay = 0;
 
     int count_fps_draw = 0;
-    int fpsseg_draw = 0;
 
 #ifdef DEBUG_MSG
     printf("Iniciando xpectrum\n");
@@ -4170,7 +4175,22 @@ int main(int argc, char *argv[])
 
     ZX_Init();
 
+    main_loop();
+    main_shutdown();
+    return 0;
+}
 
+int main_loop(void)
+{
+    static int nvol = 0;
+    static int i, n, r, ret;
+    static char *mname;
+    static int count_fps = 0;
+    static int count_fps_draw = 0;
+    static int fpsseg = 0;
+    static int fpsseg_draw = 0;
+    static long tape_stop_delay = 0;
+    static int sel_key = 0;
 
     while(1)
     {
@@ -4606,14 +4626,5 @@ int main(int argc, char *argv[])
         sound_end();
     }
 
-    save_mconfig();
-
-    tape_finish();
-
-    sound_volume(70,70);
-    sound_close();
-
-    microlib_end();
-
-    return(0);
+    return 0;
 }
