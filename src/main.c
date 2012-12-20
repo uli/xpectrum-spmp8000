@@ -384,7 +384,7 @@ void save_mconfig()
     if (fp == NULL) return;
     fwrite(&mconfig, 1, sizeof(mconfig), fp);
     fclose(fp);
-#ifndef SPMP
+#if !defined(SPMP) && !defined(ACTSEMI)
     sync();
 #endif
 }
@@ -736,7 +736,7 @@ void save_bmp(char *name,unsigned char *punt, int ancho, int alto, int align)
         fwrite(punt+(alto-i)*align, 1, ancho, fp);
     }
     fclose(fp);
-#ifndef SPMP
+#if !defined(SPMP) && !defined(ACTSEMI)
     sync();
 #endif
 }
@@ -1628,7 +1628,7 @@ void write_pokefile(char *name)
         }
     }
     fclose(fp);
-#ifndef SPMP
+#if !defined(SPMP) && !defined(ACTSEMI)
     sync();
 #endif
 }
@@ -2284,7 +2284,7 @@ int disk_manager()
                 {
 					sprintf(photo_name,"%s/saves/%s.dsk",globalpath,cad);
                     m = dsk_save(photo_name);
-#ifndef SPMP
+#if !defined(SPMP) && !defined(ACTSEMI)
                     sync();
 #endif
                 }
@@ -2882,7 +2882,7 @@ void write_keyfile(char *name)
     fprintf(fp,"L: %i\n",map_keys[8]);
     fprintf(fp,"R: %i\n",map_keys[9]);
     fclose(fp);
-#ifndef SPMP
+#if !defined(SPMP) && !defined(ACTSEMI)
     sync();
 #endif
 }
@@ -3572,7 +3572,7 @@ int compress_rom(char *name)
     BZ2_bzWriteClose (&bzip_err, my_bzip,0,(void*)&n,(void*)&m);
     fclose(fp_bzip);
     free(temp);
-#ifndef SPMP
+#if !defined(SPMP) && !defined(ACTSEMI)
     sync();
 #endif
     if (i != BZ_OK || bzip_err != BZ_OK)
@@ -3688,7 +3688,7 @@ int save_state(int st)
         rename(photo_name,savefile);
     }
     else remove(photo_name);
-#ifndef SPMP
+#if !defined(SPMP) && !defined(ACTSEMI)
     sync();
 #endif
 
