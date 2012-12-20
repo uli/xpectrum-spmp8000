@@ -1,0 +1,25 @@
+ACTSEMI = /sources/actsemi/actsemi
+include $(ACTSEMI)/config.mk
+
+TARGET = xpectrum
+
+all: $(TARGET)
+
+CFLAGS += -DACTSEMI -W -Wall -Wno-unused -Wno-old-style-declaration -I$(ACTSEMI)/libactsemi -I$(BASELIBC)/include -Iincludes -I. -Icpu -O2 -DBZ_STRICT_ANSI
+#CFLAGS += -DUSE_ZLIB
+CFLAGS += -DAS_DEBUG
+OBJS = font.o main.o actsemi/microlib.o  \
+	cpu/z80.o graphics.o ay8910.o fdc.o snaps.o player.o \
+	bzip/blocksort.o bzip/huffman.o bzip/crctable.o bzip/randtable.o bzip/compress.o bzip/decompress.o bzip/bzlib.o \
+	mylibspectrum/tzx_read.o  mylibspectrum/tape.o  mylibspectrum/tape_block.o mylibspectrum/myglib.o \
+	mylibspectrum/tap.o mylibspectrum/tape_set.o mylibspectrum/symbol_table.o \
+	mylibspectrum/libspectrum.o mylibspectrum/zlib.o mylibspectrum/tape_accessors.o zxtape.o
+#OBJS += minizip/unzip.o minizip/ioapi.o
+LIBS = -L$(ACTSEMI)/libactsemi -lactsemi -L$(BASELIBC) -lc -lm -lgcc
+#LIBS += -lz
+
+$(TARGET): $(OBJS)
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+
+clean:
+	rm -f $(OBJS)
