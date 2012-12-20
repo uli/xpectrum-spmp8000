@@ -90,7 +90,7 @@ extern int full_screen;
 
 char * get_name(char *name);
 
-extern byte  DSK[1*1024*1024];
+extern byte  *DSK;
 extern t_drive driveA;
 extern t_FDC FDC;
 extern t_track *active_track;
@@ -747,12 +747,12 @@ void save_bmp(char *name,unsigned char *punt, int ancho, int alto, int align)
 /***************************************************************************/
 
 
-#define MAX_ENTRY 16384
+#define MAX_ENTRY 1024
 
 struct files
 {
     int is_directory;
-    char file[512];
+    char file[256];
 } files[MAX_ENTRY];
 
 //#ifdef IPHONE
@@ -935,7 +935,7 @@ char * get_name_short(char *name, int sz) // devuelve el nombre del fichero reco
 
 int zip_load(char *name);
 
-byte  scrbuff[2*16*16384 * 2]; //TODO He aumentado el buffer * 2 ver porque petaba antes los z80 al cargarlos
+byte *scrbuff;
 char last_rom_name[512];
 
 int load_scr(char *name, byte * buffer, int size)
@@ -1137,7 +1137,7 @@ int get_rom(int tape)
 
             if ( !strcasecmp(files[posfile].file+l-4,".sna") || !strcasecmp(files[posfile].file+l-8,".sna.bz2") )
             {
-                if (!load_scr(files[posfile].file, scrbuff, sizeof(scrbuff)))
+                if (!load_scr(files[posfile].file, scrbuff, 128*1024))
                 {
                     DrawZXtoScreen(video_screen8, &scrbuff[27], scale, 2);
                 }
@@ -1145,7 +1145,7 @@ int get_rom(int tape)
             else if ( !strcasecmp(files[posfile].file+l-4,".sav") )
             {
 
-            	if (!load_savsrc(files[posfile].file, scrbuff, sizeof(scrbuff)))
+            	if (!load_savsrc(files[posfile].file, scrbuff, 128*1024))
                 {
 
              		byte nPages = scrbuff[6+sizeof(Z80Regs)];
@@ -1159,7 +1159,7 @@ int get_rom(int tape)
              }
             if ( !strcasecmp(files[posfile].file+l-3,".sp") || !strcasecmp(files[posfile].file+l-7,".sp.bz2") )
             {
-                if (!load_scr(files[posfile].file, scrbuff, sizeof(scrbuff)))
+                if (!load_scr(files[posfile].file, scrbuff, 128*1024))
                 {
                    DrawZXtoScreen(video_screen8, &scrbuff[38], scale, 2);
                 }
@@ -1167,12 +1167,12 @@ int get_rom(int tape)
             else
             if ( !strcasecmp(files[posfile].file+l-4,".z80") || !strcasecmp(files[posfile].file+l-8,".z80.bz2") )
             {
-                if (!load_scr(files[posfile].file, scrbuff, sizeof(scrbuff)))
+                if (!load_scr(files[posfile].file, scrbuff, 128*1024))
                 {
                     if ((scrbuff[6] != 0)||(scrbuff[7] != 0))
                     {
-                        UncompressZ80 (&scrbuff[512*1024], (scrbuff[12] & 0x20) ? 1 /*Z80BL_V1COMPRE*/ : 0/*Z80BL_V1UNCOMP*/, 0, NULL, &scrbuff[30]);
-                        DrawZXtoScreen(video_screen8, &scrbuff[512*1024], scale, 2);
+                        UncompressZ80 (&scrbuff[64*1024], (scrbuff[12] & 0x20) ? 1 /*Z80BL_V1COMPRE*/ : 0/*Z80BL_V1UNCOMP*/, 0, NULL, &scrbuff[30]);
+                        DrawZXtoScreen(video_screen8, &scrbuff[64*1024], scale, 2);
                     }
                     else
                     {
@@ -1242,11 +1242,11 @@ int get_rom(int tape)
 
                             if (pag == scr_page)
                             {
-                                UncompressZ80(&scrbuff[512*1024], (tam == 0xffff ? 3/*Z80BL_V2UNCOMP*/ : 4/*Z80BL_V2COMPRE*/), tam, NULL, source);
+                                UncompressZ80(&scrbuff[64*1024], (tam == 0xffff ? 3/*Z80BL_V2UNCOMP*/ : 4/*Z80BL_V2COMPRE*/), tam, NULL, source);
                                 break;
                             }
                         }
-                        DrawZXtoScreen(video_screen8, &scrbuff[512*1024], scale, 2);
+                        DrawZXtoScreen(video_screen8, &scrbuff[64*1024], scale, 2);
                     }
                 }
             }
@@ -4094,6 +4094,14 @@ void main_shutdown(void)
     sound_close();
 
     microlib_end();
+#ifdef ACTSEMI
+#define large_free kfree
+#else
+#define large_free free
+#endif
+    large_free(DSK);
+    large_free(scrbuff);
+    large_free(GAME);
 }
 
 int main_loop(void);
@@ -4106,6 +4114,20 @@ int android_main(int argc, char *argv[])
 int main(int argc, char *argv[])
 #endif
 {
+#ifdef ACTSEMI
+#define large_malloc kmalloc
+#else
+#define large_malloc malloc
+#endif
+    DSK = large_malloc(1 * 1024 * 1024);
+    scrbuff = large_malloc(128 * 1024);
+    GAME = large_malloc(1 * 1024 * 1024);
+#if defined(ACTSEMI) && defined(AS_DEBUG)
+    fprintf(stderr, "DSK 0x%x, scrbuff 0x%x, GAME 0x%x", 
+            (unsigned int)DSK,
+            (unsigned int)scrbuff,
+            (unsigned int)GAME);
+#endif
 #ifdef SPMP
     libgame_chdir_game();
 #ifdef SPMP_ADBG

@@ -200,8 +200,8 @@ byte *MEMr[4]; //solid block of 16*4 = 64kb for reading
 byte *MEMw[4]; //solid block of 16*4 = 64kb for writing
 byte  MEMc[4]; //contended 16k block? 1/0
 byte  MEMs[4]; //screen 16k block? 1/0
-byte  GAME[1*1024*1024];
-byte  DSK[1*1024*1024];
+byte *GAME;
+byte *DSK;
 long GAME_size;   //game(s) workspace
 byte  RAM_dummy[16384*1];  //to emulate spectrum 16
 byte  ROM_dummy[16384*1];

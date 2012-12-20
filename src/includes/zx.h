@@ -48,7 +48,7 @@ extern byte zx_ula64_palette[64];
   void ZX_LoadGame(int preferred_model, unsigned long crc, int quick_if_possible);
 
 extern byte  kempston, fuller;
-extern byte  GAME[1*1024*1024]; extern long GAME_size;
+extern byte  *GAME; extern long GAME_size;
 extern byte *MEMr[4]; //solid block of 16*4 = 64kb for reading
 extern byte *MEMw[4]; //solid block of 16*4 = 64kb for writing
 extern byte  RAM_dummy[16384*1];
