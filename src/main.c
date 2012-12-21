@@ -47,6 +47,7 @@
 #endif
 #ifdef ACTSEMI
 #include <actsemi.h>
+#include "actsemi/version.h"
 #endif
 
 //#define DEBUG_MSG
@@ -1541,7 +1542,7 @@ void credits()
     v_putcad((40-27)/2,y,132,"and others (thanks for all)");//y += 2;
 #else
     y=1;
-#ifdef SPMP
+#if defined(SPMP) || defined(ACTSEMI)
     v_putcad((40-18)/2,y,130,"xpectrum " BUILD_STRING);y += 2;
 #else
     v_putcad((40-18)/2,y,130,"GP2Xpectrum v1.9.2");y += 2;
@@ -1557,10 +1558,16 @@ void credits()
     v_putcad((40-24)/2,y,132,"Ulrich Doewich / Caprice");y += 2;
     v_putcad((40-22)/2,y,132,"Sergey Bulba /  AY2SNA");y += 2;
     v_putcad((40-27)/2,y,132,"and others (thanks for all)");y += 2;
+#if defined(SPMP) || defined(ACTSEMI)
 #ifdef SPMP
     v_putcad((40-27)/2,y,129,"SPMP8K port by Ulrich Hecht"); y++;
+#else
+    v_putcad((40-32)/2,y,129,"Action Semi port by Ulrich Hecht"); y++;
+#endif
     v_putcad((40-24)/2,y,129,"<ulrich.hecht@gmail.com>"); y += 2;
+#ifdef SPMP
     v_putcad((40-25)/2,y,130,"Press DOWN to map buttons");
+#endif
 #endif
 #endif
 
