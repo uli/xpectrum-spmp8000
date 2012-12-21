@@ -98,17 +98,68 @@ void sound_volume(int left, int rigth)
 }
 
 int sound_initialized = 0;
+int system_sound_enabled = 1;
+void *libsound_handle = 0;
+ao_handle_t ao_handle = 0;
 
 int sound_open(int rate, int bits, int stereo){
+    if (!sound_initialized && libsound_handle) {
+        ao_handle = mmm_ao_open();
+        if (!ao_handle) {
+            DBG("failed to get AO handle\n");
+            return 0;
+        }
+        mmm_ao_params_t ap;
+        ap.channels = 2;
+        ap.rate = 44100;
+        if (mmm_ao_cmd(ao_handle, MMM_AO_SET_PARAMS, &ap) < 0) {
+            DBG("MMM_AO_SET_PARAMS failed\n");
+        }
+        if (mmm_ao_cmd(ao_handle, MMM_AO_SET_BUFFER_SIZE, (void *)0x800) < 0) {
+            DBG("MMM_AO_SET_BUFFER_SIZE failed\n");
+        }
+        /* Not entirely sure what this does, but using lower values results
+           in clicks once in a while. */
+        if (mmm_ao_cmd(ao_handle, MMM_AO_SET_FRAMES, (void *)4) < 0) {
+            DBG("MMM_AO_SET_FRAMES failed\n");
+        }
+        if (mmm_ao_cmd(ao_handle, MMM_AO_PLAY, 0) < 0) {
+            DBG("MMM_AO_PLAY failed\n");
+        }
+        sound_initialized = 1;
+    }
     return 0;
 }
 
 int sound_close(){
+    if (sound_initialized) {
+        if (ao_handle)
+          mmm_ao_close(ao_handle);
+        sound_initialized = 0;
+    }
     return 0;
 }
 
 int sound_send(void *samples,int nsamples)
 {
+    if (sound_initialized) {
+        int32_t *left = malloc(nsamples / 2 * 4);
+        int32_t *right = malloc(nsamples / 2 * 4);
+        int16_t *in = (int16_t *)samples;
+        int i;
+        for (i = 0; i < nsamples / 2; i++) {
+            left[i] = in[i * 2];
+            right[i] = in[i * 2 + 1];
+        }
+        mmm_ao_data_t ad;
+        ad.buf_left = left;
+        ad.buf_right = right;
+        ad.channels = 2;
+        ad.buf_size = nsamples / 2;
+        mmm_ao_data(ao_handle, &ad);
+        free(left);
+        free(right);
+    }
     return 0;
 }
 
@@ -119,6 +170,8 @@ void microlib_end(void)
         sound_close();
         free(video_screen8);
         free(video_screen8_back);
+        if (libsound_handle)
+            dlclose(libsound_handle);
         microlib_inited = 0;
     }
 }
@@ -127,6 +180,10 @@ void microlib_init()
 {
     if ( !microlib_inited )
     {
+        libsound_handle = dlopen("libsound.so", 1);
+        if (!libsound_handle) {
+            DBG("failed to dlopen libsound.so\n");
+        }
         video_screen8 = malloc( 320 * 240 );
         video_screen8_back = malloc(320 * 240);
 
@@ -279,7 +336,8 @@ int control(int cmd, void *data)
       DBG("another name %s\n", (char *)data);
       return 0;
     case 7:	/* sound enable */
-      DBG("sound enable %d\n", *((int *)data));
+      system_sound_enabled = *((int *)data);
+      DBG("sound enable %d\n", system_sound_enabled);
       return 0;
     case 10:	/* pause */
       DBG("pause\n");
