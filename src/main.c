@@ -1127,6 +1127,8 @@ int get_rom(int tape)
         if(downloads_dir)
 #ifdef SPMP
           sprintf(cad,"DOWNLOADS (%u) (Use A to refresh)",nfiles-ndirs);
+#elif defined(ACTSEMI)
+          sprintf(cad,"DOWNLOADS (%u) (Use [] to refresh)",nfiles-ndirs);
 #else
           sprintf(cad,"DOWNLOADS (%u) (Use EDIT to refresh)",nfiles-ndirs);
 #endif
@@ -1308,6 +1310,8 @@ int get_rom(int tape)
             v_putcad(1,28,132,"Use X to Exit, Use B to Play");
 #elif defined(SPMP)
         v_putcad(1,28,132,"CANCEL: exit, OK: play, DELETE: delete");
+#elif defined(ACTSEMI)
+        v_putcad(1,28,132,"Use X to Exit, O to Play, /\\ to delete");
 #else
         v_putcad(1,28,132,"Use X to Exit, B to Play, Y to delete");
 #endif
@@ -1379,7 +1383,13 @@ int get_rom(int tape)
                 COLORFONDO = 128;
                 sprintf( fname, "%s%s", actual_roms_dir, get_name(files[posfile].file));
                 v_putcad((40-strlen(fname))>>1,12,133,fname);
+#ifdef SPMP
+                v_putcad((40-26)>>1,14,130,"Press OK Yes or CANCEL No");
+#elif defined(ACTSEMI)
+                v_putcad((40-19)>>1,14,130,"Press O Yes or X No");
+#else
                 v_putcad((40-19)>>1,14,130,"Press B Yes or X No");
+#endif
 
                 dump_video();
 
@@ -1403,7 +1413,13 @@ int get_rom(int tape)
             COLORFONDO = 128+3;
             v_putcad((40-18)>>1,10,132,"Refreshing files");
             COLORFONDO = 128;
+#ifdef SPMP
+            v_putcad((40-20)>>1,14,130,"Press OK to continue");
+#elif defined(ACTSEMI)
+            v_putcad((40-19)>>1,14,130,"Press O to continue");
+#else
             v_putcad((40-19)>>1,14,130,"Press B to continue");
+#endif
 
             dump_video();
 
@@ -1426,7 +1442,13 @@ int get_rom(int tape)
             COLORFONDO = 128+3;
             v_putcad((40-35)>>1,10,132,"You really want compress all files?");
             COLORFONDO = 128;
+#ifdef SPMP
+            v_putcad((40-25)>>1,14,130,"Press OK Yes or CANCEL No");
+#elif defined(ACTSEMI)
+            v_putcad((40-19)>>1,14,130,"Press O Yes or X No");
+#else
             v_putcad((40-19)>>1,14,130,"Press B Yes or X No");
+#endif
 
             dump_video();
 
@@ -1852,6 +1874,9 @@ int poke_manager()
 #ifdef SPMP
             v_putcad(2,y,132,"Use EDIT to edit, OK to select"); y += 2;
             v_putcad(2,y,132,"Use CANCEL to abort");
+#elif defined(ACTSEMI)
+            v_putcad(2,y,132,"Use [] to edit, O to select"); y += 2;
+            v_putcad(2,y,132,"Use X to abort");
 #else
             v_putcad(2,y,132,"Use A to edit, B to select"); y += 2;
             v_putcad(2,y,132,"Use X to abort");
@@ -1887,6 +1912,9 @@ int poke_manager()
 #ifdef SPMP
             v_putcad((40-37)>>1,y,132,"Use EDIT to edit poke, OK to select");y += 2;
             v_putcad((40-19)>>1,y,132,"Use CANCEL to abort");y += 2;
+#elif defined(ACTSEMI)
+            v_putcad((40-32)>>1,y,132,"Use [] to edit poke, O to select");y += 2;
+            v_putcad((40-14)>>1,y,132,"Use X to abort");y += 2;
 #else
             v_putcad((40-31)>>1,y,132,"Use A to edit poke, B to select");y += 2;
             v_putcad((40-14)>>1,y,132,"Use X to abort");y += 2;
@@ -1936,6 +1964,8 @@ int poke_manager()
             v_putcad((40-34)>>1,y,132,"Use LEFT/RIGHT in Virtual Keyboard");y += 2;
 #ifdef SPMP
             v_putcad((40-39)>>1,y,132,"Use OK to select and CANCEL to finish");y += 2;
+#elif defined(ACTSEMI)
+            v_putcad((40-31)>>1,y,132,"Use O to select and X to finish");y += 2;
 #else
             v_putcad((40-31)>>1,y,132,"Use B to select and X to finish");y += 2;
 #endif
@@ -2239,6 +2269,8 @@ int disk_manager()
         v_putcad((40-34)>>1,y,132,"Use LEFT/RIGHT in Virtual Keyboard");y += 2;
 #ifdef SPMP
         v_putcad((40-34)>>1,y,132,"Use OK to select, CANCEL to abort");y += 2;
+#elif defined(ACTSEMI)
+        v_putcad((40-34)>>1,y,132,"Use O to select and X to abort");y += 2;
 #else
         v_putcad((40-34)>>1,y,132,"Use B to select and X to abort");y += 2;
 #endif
@@ -3277,7 +3309,13 @@ int zip_load(char *name)
                 COLORFONDO = 128;
                 m++;
             }
+#ifdef SPMP
+            v_putcad(1,28,132,"Press OK to Select ZIP Entry");
+#elif defined(ACTSEMI)
+            v_putcad(1,28,132,"Press O to Select ZIP Entry");
+#else
             v_putcad(1,28,132,"Press B to Select ZIP Entry");
+#endif
 
         /*
             int y = 6;
@@ -3441,7 +3479,13 @@ int zip_load(char *name)
                 COLORFONDO = 128;
                 m++;
             }
+#ifdef SPMP
+            v_putcad(1,28,132,"Press OK to Select ZIP Entry");
+#elif defined(ACTSEMI)
+            v_putcad(1,28,132,"Press O to Select ZIP Entry");
+#else
             v_putcad(1,28,132,"Press B to Select ZIP Entry");
+#endif
 
         /*
             int y = 6;
