@@ -290,6 +290,8 @@ void SyncFreq()
     	time = getTicks();
 #ifdef SPMP
     	microlib_usleep(100);
+#elif defined(ACTSEMI)
+        /* usleep() is not accurate enough for this */
 #else
         usleep(100);
 #endif
