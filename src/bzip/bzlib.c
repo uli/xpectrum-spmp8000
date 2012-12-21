@@ -75,6 +75,9 @@
 
 #include "bzlib_private.h"
 
+#ifdef ACTSEMI
+#include <actsemi.h>
+#endif
 
 /*---------------------------------------------------*/
 /*--- Compression stuff                           ---*/
@@ -146,14 +149,22 @@ int bz_config_ok ( void )
 static
 void* default_bzalloc ( void* opaque, Int32 items, Int32 size )
 {
+#ifdef ACTSEMI
+   void* v = kmalloc ( items * size );
+#else
    void* v = malloc ( items * size );
+#endif
    return v;
 }
 
 static
 void default_bzfree ( void* opaque, void* addr )
 {
+#ifdef ACTSEMI
+   if (addr != NULL) kfree ( addr );
+#else
    if (addr != NULL) free ( addr );
+#endif
 }
 
 
